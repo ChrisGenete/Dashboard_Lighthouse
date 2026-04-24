@@ -7,22 +7,28 @@
 }
 
 .widgets-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
+  background-color: transparent;
+}
+
+.widget-wrapper {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.widget-wrapper:hover {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
 .widget {
-  background: white;
-  border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.widget:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  flex: 1;
+  overflow-y: auto;
 }
 
 .widget h2 {
@@ -31,13 +37,39 @@
   font-size: 1.25rem;
 }
 
+/* React Grid Layout customizations */
+.react-grid-layout {
+  background-color: transparent;
+}
+
+.react-grid-item {
+  touch-action: none;
+}
+
+.react-grid-item > .react-resizable-handle {
+  background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pg08IS0tIEdlbmVyYXRvcjogQWRvYmUgRmlyZXdvcmtzIENTNiwgRXhwb3J0IFNWRyBFeHRlbnNpb24gYnkgQWFyb24gQmVhbGwgKGh0dHA6Ly9maXJld29ya3MuYWJlYWxsLmNvbSkgLiBWZXJzaW9uOiAwLjYuMSAgLS0+DTwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DTxzdmcgaWQ9IlVudGl0bGVkIFBhZ2UiIHZpZXdCb3g9IjAgMCA2IDYiIHN0eWxlPSJiYWNrZ3JvdW5kLWNvbG9yOiNmZmZmZmYwMCIgdmVyc2lvbj0iMS4xIg0JCXN0eWxlPSJvdmVyZmxvdzogdmlzaWJsZTsiPg0JPHBhdGggZD0iTSA2IDYgTCAwIDYgTCAwIDQuMiBMIDIuNCw0LjIgTCAyLjQsMi40IEwgNC4yLDIuNCBMIDQuMiwwIEwgNiwwIEwgNiw0LjIgTCA0LjIsNC4yIEwgNC4yLDYgTCA2LDYgTCA2LDYgWiIgZmlsbD0iIzAwMDAwMCIgdmVjdG9yLWVmZmVjdD0ibm9uLXNjYWxpbmctc3Ryb2tlIi8+DTwvc3ZnPg==') no-repeat center;
+  background-position: bottom right;
+  padding: 0 8px 8px 0;
+  background-repeat: no-repeat;
+  background-origin: content-box;
+  box-sizing: border-box;
+  background-image: url('data:image/svg+xml;charset=utf8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="10" height="10"%3E%3Ccircle cx="5" cy="5" r="5" fill="%23999"/%3E%3C/svg%3E');
+  background-size: 6px;
+  width: 20px;
+  height: 20px;
+  top: auto;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  cursor: se-resize;
+}
+
 @media (max-width: 768px) {
   .dashboard-container {
     padding: 1rem;
   }
 
-  .widgets-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  .react-grid-item > .react-resizable-handle {
+    display: none;
   }
 }
