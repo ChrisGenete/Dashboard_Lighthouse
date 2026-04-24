@@ -12,7 +12,17 @@ function EmailWidget() {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/email/calendar`);
       const data = await response.json();
-      setEvents(data);
+      let events = [];
+      if (Array.isArray(data)) {
+        events = data;
+      } else if (Array.isArray(data.items)) {
+        events = data.items;
+      } else if (Array.isArray(data.body?.items)) {
+        events = data.body.items;
+      } else {
+        console.warn('Unexpected calendar events response shape:', data);
+      }
+      setEvents(events);
     } catch (error) {
       console.error('Failed to fetch calendar events:', error);
     }
@@ -21,14 +31,18 @@ function EmailWidget() {
   return (
     <div className="widget email-widget">
       <h2>📧 Calendar</h2>
-      <ul className="event-list">
-        {events.map((event, index) => (
-          <li key={index} className="event-item">
-            <span className="event-title">{event.summary}</span>
-            <span className="event-time">{new Date(event.start.dateTime).toLocaleString()}</span>
-          </li>
-        ))}
-      </ul>
+      {events.length > 0 ? (
+        <ul className="event-list">
+          {events.map((event, index) => (
+            <li key={index} className="event-item">
+              <span className="event-title">{event.summary}</span>
+              <span className="event-time">{new Date(event.start.dateTime).toLocaleString()}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="empty-state">No upcoming events.</div>
+      )}
     </div>
   );
 }
