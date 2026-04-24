@@ -49,12 +49,13 @@ function GitHubWidget() {
     }
   };
 
+  const contributionColorStops = ['#000000', '#216e39', '#34b155', '#2de64c'];
+
   const getContributionColor = (count) => {
-    if (count === 0) return '#000000';
-    if (count <= 2) return '#216e39';
-    if (count <= 5) return '#34b155';
-    if (count <= 10) return '#2de64c';
-    return '#2de64c';
+    if (count === 0) return contributionColorStops[0];
+    if (count <= 2) return contributionColorStops[1];
+    if (count <= 5) return contributionColorStops[2];
+    return contributionColorStops[3];
   };
 
   const contributionTotal = contributions
@@ -106,10 +107,10 @@ function GitHubWidget() {
             <div className="contribution-graph-wrapper">
               <div className="graph-legend">
                 <span>Less</span>
-                <div className="legend-swatch dark" />
-                <div className="legend-swatch light-green" />
-                <div className="legend-swatch mid-green" />
-                <div className="legend-swatch deep-green" />
+                <div className="legend-swatch" style={{ backgroundColor: contributionColorStops[0] }} />
+                <div className="legend-swatch" style={{ backgroundColor: contributionColorStops[1] }} />
+                <div className="legend-swatch" style={{ backgroundColor: contributionColorStops[2] }} />
+                <div className="legend-swatch" style={{ backgroundColor: contributionColorStops[3] }} />
                 <span>More</span>
               </div>
 
@@ -120,7 +121,7 @@ function GitHubWidget() {
                       <div
                         key={day.date}
                         className="contribution-day"
-                        style={{ backgroundColor: day.color || getContributionColor(day.contributionCount) }}
+                        style={{ backgroundColor: getContributionColor(day.contributionCount) }}
                         title={`${day.date}: ${day.contributionCount} contribution${day.contributionCount === 1 ? '' : 's'}`}
                       />
                     ))}
