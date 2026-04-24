@@ -10,7 +10,7 @@
 }
 
 .range-label {
-  color: #444;
+  color: #000000;
   font-weight: 600;
   margin-bottom: 0.75rem;
 }
@@ -64,7 +64,7 @@
 }
 
 .legend-swatch.dark {
-  background: #161b22;
+  background: #000000;
 }
 
 .legend-swatch.light-green {
