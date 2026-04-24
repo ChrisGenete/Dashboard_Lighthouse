@@ -50,11 +50,11 @@ function GitHubWidget() {
   };
 
   const getContributionColor = (count) => {
-    if (count === 0) return '#161b22';
-    if (count <= 2) return '#9be9a8';
-    if (count <= 5) return '#40c463';
-    if (count <= 10) return '#30a14e';
-    return '#216e39';
+    if (count === 0) return '#000000';
+    if (count <= 2) return '#216e39';
+    if (count <= 5) return '#34b155';
+    if (count <= 10) return '#2de64c';
+    return '#2de64c';
   };
 
   const contributionTotal = contributions
