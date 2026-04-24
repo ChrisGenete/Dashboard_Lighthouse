@@ -2,6 +2,55 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.contributions-panel {
+  margin-top: 1rem;
+}
+
+.range-label {
+  color: #444;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.range-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.range-button {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.range-button:hover {
+  background: #f3f4f6;
+}
+
+.range-button.active {
+  background: #667eea;
+  color: #ffffff;
+  border-color: #667eea;
+}
+
+.contribution-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.loading-text {
+  color: #555;
+  margin: 0.5rem 0;
 }
 
 .stat {
