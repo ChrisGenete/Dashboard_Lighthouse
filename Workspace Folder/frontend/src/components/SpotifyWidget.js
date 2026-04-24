@@ -5,51 +5,102 @@ function SpotifyWidget() {
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const [playlist, setPlaylist] = useState(null);
   const [playlistTracks, setPlaylistTracks] = useState([]);
+  const [authorized, setAuthorized] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const loadSpotify = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        await Promise.all([fetchCurrentlyPlaying(), fetchPlaylist()]);
-      } catch (fetchError) {
-        setError(fetchError.message || 'Failed to load Spotify data.');
-      } finally {
-        setLoading(false);
-      }
+    const initialize = async () => {
+      await checkAuthStatus();
     };
 
-    loadSpotify();
+    initialize();
   }, []);
 
-  const fetchCurrentlyPlaying = async () => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/spotify/currently-playing`);
-    const data = await response.json();
+  const checkAuthStatus = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/spotify/auth/status`);
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.message || 'Could not load currently playing track.');
+      if (response.ok && data.authorized) {
+        setAuthorized(true);
+        await loadSpotifyData();
+      } else {
+        setAuthorized(false);
+      }
+    } catch (authError) {
+      setError(authError.message || 'Unable to verify Spotify authorization.');
+      setAuthorized(false);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setCurrentlyPlaying(data.playing ? data : null);
+  const loadSpotifyData = async () => {
+    setError(null);
+    const playlistFromPlayback = await fetchCurrentlyPlaying();
+
+    if (!playlistFromPlayback) {
+      await fetchPlaylist();
+    }
+  };
+
+  const fetchCurrentlyPlaying = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/spotify/currently-playing`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Could not load currently playing track.');
+      }
+
+      setCurrentlyPlaying(data.playing ? data : null);
+
+      if (data.playlist?.tracks?.items) {
+        setPlaylist(data.playlist);
+        setPlaylistTracks(
+          data.playlist.tracks.items
+            .map((item) => item.track)
+            .filter(Boolean)
+            .slice(0, 10)
+        );
+        return true;
+      }
+
+      return false;
+    } catch (fetchError) {
+      if (fetchError.message.toLowerCase().includes('not authorized')) {
+        setAuthorized(false);
+        return false;
+      }
+      setError(fetchError.message);
+      return false;
+    }
   };
 
   const fetchPlaylist = async () => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/spotify/playlist`);
-    const data = await response.json();
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/spotify/playlist`);
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.message || 'Could not load Spotify playlist.');
+      if (!response.ok) {
+        throw new Error(data.message || 'Could not load Spotify playlist.');
+      }
+
+      const tracks = Array.isArray(data.tracks?.items)
+        ? data.tracks.items.map((item) => item.track).filter(Boolean)
+        : [];
+
+      setPlaylist(data);
+      setPlaylistTracks(tracks.slice(0, 10));
+    } catch (fetchError) {
+      setError(fetchError.message);
     }
+  };
 
-    const tracks = Array.isArray(data.tracks?.items)
-      ? data.tracks.items.map((item) => item.track).filter(Boolean)
-      : [];
-
-    setPlaylist(data);
-    setPlaylistTracks(tracks.slice(0, 10));
+  const loginToSpotify = () => {
+    window.location.href = `${process.env.REACT_APP_API_URL}/api/spotify/auth/login`;
   };
 
   const formatArtists = (artists) => {
@@ -64,6 +115,13 @@ function SpotifyWidget() {
 
       {loading ? (
         <div className="empty-state">Loading Spotify...</div>
+      ) : !authorized ? (
+        <div className="spotify-auth-prompt">
+          <div className="empty-state">Connect your Spotify account to see current playback and playlist details.</div>
+          <button className="spotify-login-button" onClick={loginToSpotify}>
+            Connect Spotify
+          </button>
+        </div>
       ) : (
         <>
           <div className="spotify-now-playing">

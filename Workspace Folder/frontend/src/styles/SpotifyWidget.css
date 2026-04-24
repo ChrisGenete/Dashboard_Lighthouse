@@ -94,3 +94,24 @@
   border-radius: 10px;
   text-align: center;
 }
+
+.spotify-auth-prompt {
+  display: grid;
+  gap: 1rem;
+  align-items: center;
+}
+
+.spotify-login-button {
+  padding: 0.8rem 1.2rem;
+  border: none;
+  border-radius: 999px;
+  background: #1db954;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.spotify-login-button:hover {
+  background: #17a44b;
+}
