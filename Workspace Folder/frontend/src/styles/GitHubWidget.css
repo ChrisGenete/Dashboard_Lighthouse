@@ -1,26 +1,134 @@
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  gap: clamp(0.5rem, 2vw, 1rem);
+  margin-bottom: 1.25rem;
+}
+
+.contributions-panel {
+  margin-top: 1rem;
+}
+
+.range-label {
+  color: #000000;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.range-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.range-button {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.range-button:hover {
+  background: #f3f4f6;
+}
+
+.range-button.active {
+  background: #667eea;
+  color: #ffffff;
+  border-color: #667eea;
+}
+
+.contribution-graph-wrapper {
+  margin-bottom: 1rem;
+}
+
+.graph-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  color: #555;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.legend-swatch.dark {
+  background: #000000;
+}
+
+.legend-swatch.light-green {
+  background: #9be9a8;
+}
+
+.legend-swatch.mid-green {
+  background: #40c463;
+}
+
+.legend-swatch.deep-green {
+  background: #216e39;
+}
+
+.contribution-graph {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.week-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contribution-day {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.contribution-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.5rem, 2vw, 1rem);
+}
+
+.loading-text {
+  color: #555;
+  margin: 0.5rem 0;
 }
 
 .stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1rem;
+  padding: clamp(0.5rem, 3vw, 1rem);
   background: #f8f9fa;
   border-radius: 8px;
+  min-width: 0;
 }
 
 .stat .label {
   color: #666;
-  font-size: 0.875rem;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
   margin-bottom: 0.25rem;
 }
 
 .stat .value {
   color: #667eea;
-  font-size: 1.5rem;
+  font-size: clamp(1.25rem, 4vw, 1.5rem);
   font-weight: bold;
 }
