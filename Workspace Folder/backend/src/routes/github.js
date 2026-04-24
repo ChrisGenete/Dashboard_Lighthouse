@@ -42,6 +42,16 @@ router.get('/contributions/:username', async (req, res) => {
             totalPullRequestContributions
             totalPullRequestReviewContributions
             totalRepositoryContributions
+            contributionCalendar {
+              totalContributions
+              weeks {
+                contributionDays {
+                  date
+                  contributionCount
+                  color
+                }
+              }
+            }
           }
         }
       }

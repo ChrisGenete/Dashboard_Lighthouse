@@ -42,6 +42,64 @@
   border-color: #667eea;
 }
 
+.contribution-graph-wrapper {
+  margin-bottom: 1rem;
+}
+
+.graph-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  color: #555;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.legend-swatch.dark {
+  background: #161b22;
+}
+
+.legend-swatch.light-green {
+  background: #9be9a8;
+}
+
+.legend-swatch.mid-green {
+  background: #40c463;
+}
+
+.legend-swatch.deep-green {
+  background: #216e39;
+}
+
+.contribution-graph {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.week-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contribution-day {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 .contribution-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

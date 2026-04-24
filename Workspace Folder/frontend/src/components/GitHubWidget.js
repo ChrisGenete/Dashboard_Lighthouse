@@ -49,6 +49,14 @@ function GitHubWidget() {
     }
   };
 
+  const getContributionColor = (count) => {
+    if (count === 0) return '#161b22';
+    if (count <= 2) return '#9be9a8';
+    if (count <= 5) return '#40c463';
+    if (count <= 10) return '#30a14e';
+    return '#216e39';
+  };
+
   const contributionTotal = contributions
     ? contributions.totalCommitContributions +
       contributions.totalIssueContributions +
@@ -94,32 +102,60 @@ function GitHubWidget() {
         {loadingContributions ? (
           <p className="loading-text">Loading contributions...</p>
         ) : contributions ? (
-          <div className="contribution-stats">
-            <div className="stat">
-              <span className="label">Repos contributed</span>
-              <span className="value">{contributions.totalRepositoryContributions}</span>
+          <>
+            <div className="contribution-graph-wrapper">
+              <div className="graph-legend">
+                <span>Less</span>
+                <div className="legend-swatch dark" />
+                <div className="legend-swatch light-green" />
+                <div className="legend-swatch mid-green" />
+                <div className="legend-swatch deep-green" />
+                <span>More</span>
+              </div>
+
+              <div className="contribution-graph" role="img" aria-label="GitHub-style contribution graph">
+                {contributions.contributionCalendar?.weeks?.map((week, weekIndex) => (
+                  <div key={weekIndex} className="week-column">
+                    {week.contributionDays.map((day) => (
+                      <div
+                        key={day.date}
+                        className="contribution-day"
+                        style={{ backgroundColor: day.color || getContributionColor(day.contributionCount) }}
+                        title={`${day.date}: ${day.contributionCount} contribution${day.contributionCount === 1 ? '' : 's'}`}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="stat">
-              <span className="label">Total contributions</span>
-              <span className="value">{contributionTotal}</span>
+
+            <div className="contribution-stats">
+              <div className="stat">
+                <span className="label">Repos contributed</span>
+                <span className="value">{contributions.totalRepositoryContributions}</span>
+              </div>
+              <div className="stat">
+                <span className="label">Total contributions</span>
+                <span className="value">{contributionTotal}</span>
+              </div>
+              <div className="stat">
+                <span className="label">Commits</span>
+                <span className="value">{contributions.totalCommitContributions}</span>
+              </div>
+              <div className="stat">
+                <span className="label">Pull requests</span>
+                <span className="value">{contributions.totalPullRequestContributions}</span>
+              </div>
+              <div className="stat">
+                <span className="label">Issues</span>
+                <span className="value">{contributions.totalIssueContributions}</span>
+              </div>
+              <div className="stat">
+                <span className="label">Reviews</span>
+                <span className="value">{contributions.totalPullRequestReviewContributions}</span>
+              </div>
             </div>
-            <div className="stat">
-              <span className="label">Commits</span>
-              <span className="value">{contributions.totalCommitContributions}</span>
-            </div>
-            <div className="stat">
-              <span className="label">Pull requests</span>
-              <span className="value">{contributions.totalPullRequestContributions}</span>
-            </div>
-            <div className="stat">
-              <span className="label">Issues</span>
-              <span className="value">{contributions.totalIssueContributions}</span>
-            </div>
-            <div className="stat">
-              <span className="label">Reviews</span>
-              <span className="value">{contributions.totalPullRequestReviewContributions}</span>
-            </div>
-          </div>
+          </>
         ) : (
           <p className="loading-text">Unable to load contribution data.</p>
         )}
