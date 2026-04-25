@@ -5,9 +5,12 @@ const {
   spotifyUserApi,
   userAuthState,
   setUserTokens,
+  clearUserTokens,
   getAuthorizeUrl,
   ensureSpotifyToken,
-  getClientCredentialsToken
+  getClientCredentialsToken,
+  createSpotifyApiWithAccessToken,
+  refreshUserAccessToken
 } = require('../services/spotify');
 
 const parsePlaylistId = (uri) => {
@@ -73,9 +76,66 @@ router.get('/auth/callback', async (req, res) => {
   }
 });
 
+const getBearerToken = (req) => {
+  const header = req.headers.authorization || req.headers.Authorization;
+  if (!header) {
+    return null;
+  }
+
+  const [scheme, token] = header.split(' ');
+  return scheme === 'Bearer' && token ? token : null;
+};
+
+const getApiFromRequest = (req) => {
+  const token = getBearerToken(req);
+  if (!token) {
+    return null;
+  }
+
+  return createSpotifyApiWithAccessToken(token);
+};
+
+const isInvalidTokenError = (error) => {
+  const message = String(error?.message || '').toLowerCase();
+  const spotifyMessage = String(error?.body?.error?.message || '').toLowerCase();
+  const errorType = error?.body?.error;
+  return (
+    message.includes('invalid access token') ||
+    message.includes('token has expired') ||
+    message.includes('invalid token') ||
+    message.includes('invalid_grant') ||
+    spotifyMessage.includes('invalid access token') ||
+    spotifyMessage.includes('token has expired') ||
+    errorType === 'invalid_grant' ||
+    error?.statusCode === 401
+  );
+};
+
+const performUserApiRequest = async (fn) => {
+  try {
+    await ensureSpotifyToken('user');
+    return await fn(spotifyUserApi);
+  } catch (error) {
+    if (isInvalidTokenError(error) && userAuthState.refreshToken) {
+      try {
+        await refreshUserAccessToken();
+        return await fn(spotifyUserApi);
+      } catch (refreshError) {
+        // If refresh also fails, clear tokens
+        if (isInvalidTokenError(refreshError)) {
+          clearUserTokens();
+          throw new Error('Spotify authentication expired. Please re-authenticate.');
+        }
+        throw refreshError;
+      }
+    }
+    throw error;
+  }
+};
+
 router.post('/token', async (req, res) => {
   try {
-    const data = await getClientCredentialsToken();
+    const data = await getClientCredentialsToken(req.body);
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -84,8 +144,15 @@ router.post('/token', async (req, res) => {
 
 router.get('/currently-playing', async (req, res) => {
   try {
-    await ensureSpotifyToken('user');
-    const data = await spotifyUserApi.getMyCurrentPlayingTrack();
+    const requestApi = getApiFromRequest(req);
+    let api = requestApi || spotifyUserApi;
+    let data;
+
+    if (requestApi) {
+      data = await api.getMyCurrentPlayingTrack();
+    } else {
+      data = await performUserApiRequest((client) => client.getMyCurrentPlayingTrack());
+    }
 
     if (data.statusCode === 204 || !data.body || !data.body.item) {
       return res.json({ playing: false });
@@ -98,7 +165,7 @@ router.get('/currently-playing', async (req, res) => {
     if (body.context?.type === 'playlist') {
       const playlistId = parsePlaylistId(body.context.uri);
       if (playlistId) {
-        const playlistData = await spotifyUserApi.getPlaylist(playlistId, {
+        const playlistData = await api.getPlaylist(playlistId, {
           fields: 'id,name,description,images,tracks.items(track(id,name,artists(name),album(name,images),duration_ms,external_urls))'
         });
         playlist = playlistData.body;
@@ -133,12 +200,15 @@ router.get('/currently-playing', async (req, res) => {
 
 router.get('/playlist', async (req, res) => {
   try {
-    const api = userAuthState.accessToken ? spotifyUserApi : spotifyClient;
+    const requestApi = getApiFromRequest(req);
+    let api = requestApi || (userAuthState.accessToken ? spotifyUserApi : spotifyClient);
 
-    if (userAuthState.accessToken) {
-      await ensureSpotifyToken('user');
-    } else {
-      await ensureSpotifyToken('app');
+    if (!requestApi) {
+      if (userAuthState.accessToken) {
+        await ensureSpotifyToken('user');
+      } else {
+        await ensureSpotifyToken('app');
+      }
     }
 
     let playlistId = req.query.playlistId || process.env.SPOTIFY_PLAYLIST_ID;
@@ -151,9 +221,16 @@ router.get('/playlist', async (req, res) => {
       return res.status(400).json({ message: 'Spotify playlist ID is not configured.' });
     }
 
-    const data = await api.getPlaylist(playlistId, {
-      fields: 'id,name,description,images,tracks.items(track(id,name,artists(name),album(name,images),duration_ms,external_urls))'
-    });
+    const fetchPlaylist = async (client) =>
+      client.getPlaylist(playlistId, {
+        fields: 'id,name,description,images,tracks.items(track(id,name,artists(name),album(name,images),duration_ms,external_urls))'
+      });
+
+    const data = requestApi
+      ? await fetchPlaylist(api)
+      : userAuthState.accessToken
+      ? await performUserApiRequest(fetchPlaylist)
+      : await fetchPlaylist(api);
 
     res.json(data.body);
   } catch (error) {
@@ -166,8 +243,7 @@ router.get('/playlist', async (req, res) => {
 
 router.get('/top-tracks', async (req, res) => {
   try {
-    await ensureSpotifyToken('user');
-    const data = await spotifyUserApi.getMyTopTracks({ limit: 10 });
+    const data = await performUserApiRequest((client) => client.getMyTopTracks({ limit: 10 }));
     res.json(data.body.items);
   } catch (error) {
     if (error.message && error.message.toLowerCase().includes('not authorized')) {

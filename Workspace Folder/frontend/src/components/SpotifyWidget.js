@@ -11,11 +11,20 @@ function SpotifyWidget() {
 
   useEffect(() => {
     const initialize = async () => {
+      clearSpotifyQuery();
       await checkAuthStatus();
     };
 
     initialize();
   }, []);
+
+  const clearSpotifyQuery = () => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('spotify')) {
+      url.searchParams.delete('spotify');
+      window.history.replaceState({}, document.title, url.pathname + url.search);
+    }
+  };
 
   const checkAuthStatus = async () => {
     try {
