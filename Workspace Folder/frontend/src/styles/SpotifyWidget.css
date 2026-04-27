@@ -43,20 +43,33 @@
   margin-top: 1rem;
 }
 
+.spotify-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.spotify-widget-header h2 {
+  margin: 0;
+}
+
 .now-playing-card {
   display: flex;
   align-items: center;
   gap: 1rem;
   padding: 1rem;
   background: #ffffff;
-  border-radius: 14px;
+  border-radius: 8px;
   border: 1px solid rgba(29, 185, 84, 0.12);
 }
 
 .track-artwork {
   width: 80px;
   height: 80px;
-  border-radius: 14px;
+  flex: 0 0 80px;
+  border-radius: 8px;
   object-fit: cover;
   background: #f0f0f0;
 }
@@ -65,11 +78,60 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  color: #667;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .now-playing-details {
   display: grid;
   gap: 0.25rem;
+  min-width: 0;
+}
+
+.now-playing-status {
+  color: #1db954;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.now-playing-details .track-name,
+.now-playing-details .artist,
+.now-playing-details .album-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.now-playing-details .track-name {
+  color: #222;
+  text-decoration: none;
+}
+
+.now-playing-details .track-name:hover {
+  text-decoration: underline;
+}
+
+.track-progress {
+  height: 5px;
+  margin-top: 0.4rem;
+  overflow: hidden;
+  background: #e8eaed;
+  border-radius: 999px;
+}
+
+.track-progress span {
+  display: block;
+  height: 100%;
+  background: #1db954;
+}
+
+.spotify-connected {
+  display: grid;
+  gap: 0.9rem;
 }
 
 .playlist-header {
@@ -101,10 +163,12 @@
   align-items: center;
 }
 
-.spotify-login-button {
+.spotify-login-button,
+.spotify-logout-button,
+.spotify-refresh-button {
   padding: 0.8rem 1.2rem;
   border: none;
-  border-radius: 999px;
+  border-radius: 8px;
   background: #1db954;
   color: white;
   font-weight: 600;
@@ -112,6 +176,28 @@
   transition: background 0.2s ease;
 }
 
-.spotify-login-button:hover {
+.spotify-login-button:hover,
+.spotify-logout-button:hover,
+.spotify-refresh-button:hover:not(:disabled) {
   background: #17a44b;
+}
+
+.spotify-logout-button {
+  width: 100%;
+  background: #333;
+}
+
+.spotify-logout-button:hover {
+  background: #111;
+}
+
+.spotify-refresh-button {
+  padding: 0.45rem 0.75rem;
+  background: #eef8f1;
+  color: #166b35;
+}
+
+.spotify-refresh-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
