@@ -41,6 +41,15 @@ const setUserTokens = ({ access_token, refresh_token, expires_in }) => {
     userAuthState.expiresAt = Date.now() + expires_in * 1000;
   }
 };
+var generateRandomString = function (length) {
+  var text = '';
+  var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (var i = 0; i < length; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+};
 
 const getAuthorizeUrl = () => {
   const scopes = [
@@ -49,7 +58,7 @@ const getAuthorizeUrl = () => {
     'playlist-read-private',
     'playlist-read-collaborative'
   ];
-  const state = 'spotify_auth_state';
+  const state = generateRandomString(16);
   return spotifyUserApi.createAuthorizeURL(scopes, state);
 };
 
