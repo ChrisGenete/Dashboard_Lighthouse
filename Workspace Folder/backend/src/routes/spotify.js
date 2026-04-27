@@ -54,6 +54,11 @@ router.get('/auth/token', (req, res) => {
   });
 });
 
+router.post('/auth/logout', (req, res) => {
+  clearUserTokens();
+  res.json({ ok: true });
+});
+
 router.post('/auth/token', async (req, res) => {
   const code = req.body.code || req.query.code;
   if (!code) {
@@ -225,6 +230,44 @@ router.get('/currently-playing', async (req, res) => {
       return res.status(401).json({ message: error.message });
     }
     res.status(500).json({ message: error.message });
+  }
+});
+
+router.post('/player/:action', async (req, res) => {
+  const actions = {
+    play: (client) => client.play(),
+    pause: (client) => client.pause(),
+    next: (client) => client.skipToNext()
+  };
+  const action = actions[req.params.action];
+
+  if (!action) {
+    return res.status(400).json({ message: 'Unsupported Spotify playback action.' });
+  }
+
+  try {
+    await performUserApiRequest(action);
+    res.json({ ok: true });
+  } catch (error) {
+    const message = error.message || 'Spotify playback action failed.';
+
+    if (message.toLowerCase().includes('not authorized')) {
+      return res.status(401).json({ message });
+    }
+
+    if (error.statusCode === 403) {
+      return res.status(403).json({
+        message: 'Spotify playback control is not authorized. Please reconnect Spotify and approve playback permissions.'
+      });
+    }
+
+    if (error.statusCode === 404) {
+      return res.status(404).json({
+        message: 'No active Spotify device found. Open Spotify on a device, start playback once, then try again.'
+      });
+    }
+
+    res.status(500).json({ message });
   }
 });
 

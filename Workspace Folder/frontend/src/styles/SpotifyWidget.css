@@ -129,6 +129,54 @@
   background: #1db954;
 }
 
+.spotify-player-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+
+.spotify-control-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid #d7dce0;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #29323a;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.spotify-control-button svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.spotify-control-button:hover:not(:disabled) {
+  border-color: #1db954;
+  color: #167a3a;
+}
+
+.spotify-control-button-primary {
+  background: #1db954;
+  border-color: #1db954;
+  color: #ffffff;
+}
+
+.spotify-control-button-primary:hover:not(:disabled) {
+  background: #17a44b;
+  color: #ffffff;
+}
+
+.spotify-control-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .spotify-connected {
   display: grid;
   gap: 0.9rem;

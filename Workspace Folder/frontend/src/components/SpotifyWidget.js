@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { FaPause, FaPlay, FaStepForward } from 'react-icons/fa';
 import '../styles/SpotifyWidget.css';
 
 const API_URL = process.env.REACT_APP_API_URL;
@@ -9,6 +10,7 @@ function SpotifyWidget() {
   const [nowPlaying, setNowPlaying] = useState(null);
   const [loading, setLoading] = useState(true);
   const [trackLoading, setTrackLoading] = useState(false);
+  const [playerActionLoading, setPlayerActionLoading] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -95,11 +97,45 @@ function SpotifyWidget() {
     window.location.href = `${API_URL}/api/spotify/auth/login`;
   };
 
-  const handleLogout = () => {
+  const controlPlayback = async (action) => {
+    try {
+      setPlayerActionLoading(action);
+      const response = await fetch(`${API_URL}/api/spotify/player/${action}`, {
+        method: 'POST'
+      });
+
+      if (response.status === 401) {
+        setToken(null);
+        setNowPlaying(null);
+        return;
+      }
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Spotify playback action failed');
+      }
+
+      window.setTimeout(fetchCurrentlyPlaying, 400);
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'Spotify playback action failed');
+    } finally {
+      setPlayerActionLoading(null);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch(`${API_URL}/api/spotify/auth/logout`, {
+        method: 'POST'
+      });
+    } catch (err) {
+      setError(err.message || 'Failed to disconnect Spotify');
+    }
+
     setToken(null);
     setNowPlaying(null);
     setError(null);
-    // In a production app, you'd also call a logout endpoint to clear server-side tokens
   };
 
   const renderNowPlaying = () => {
@@ -107,7 +143,7 @@ function SpotifyWidget() {
       return <div className="empty-state">Loading current track...</div>;
     }
 
-    if (!nowPlaying || !nowPlaying.playing || !nowPlaying.track) {
+    if (!nowPlaying || !nowPlaying.track) {
       return (
         <div className="empty-state">
           Spotify is connected, but nothing is playing right now.
@@ -117,6 +153,9 @@ function SpotifyWidget() {
 
     const { track, progress_ms } = nowPlaying;
     const artwork = track.album?.images?.[0]?.url;
+    const isPlaying = nowPlaying.playing;
+    const primaryAction = isPlaying ? 'pause' : 'play';
+    const controlsDisabled = !!playerActionLoading || trackLoading;
     const progressPercent = track.duration_ms
       ? Math.min((progress_ms / track.duration_ms) * 100, 100)
       : 0;
@@ -133,7 +172,7 @@ function SpotifyWidget() {
           )}
 
           <div className="now-playing-details">
-            <div className="now-playing-status">Now playing</div>
+            <div className="now-playing-status">{isPlaying ? 'Now playing' : 'Paused'}</div>
             <a
               className="track-name"
               href={track.external_urls?.spotify}
@@ -146,6 +185,28 @@ function SpotifyWidget() {
             {track.album?.name && <div className="album-name">{track.album.name}</div>}
             <div className="track-progress" aria-hidden="true">
               <span style={{ width: `${progressPercent}%` }} />
+            </div>
+            <div className="spotify-player-controls">
+              <button
+                className="spotify-control-button spotify-control-button-primary"
+                type="button"
+                onClick={() => controlPlayback(primaryAction)}
+                disabled={controlsDisabled}
+                aria-label={isPlaying ? 'Pause Spotify' : 'Play Spotify'}
+                title={isPlaying ? 'Pause' : 'Play'}
+              >
+                {isPlaying ? <FaPause /> : <FaPlay />}
+              </button>
+              <button
+                className="spotify-control-button"
+                type="button"
+                onClick={() => controlPlayback('next')}
+                disabled={controlsDisabled}
+                aria-label="Skip to next Spotify track"
+                title="Next track"
+              >
+                <FaStepForward />
+              </button>
             </div>
           </div>
         </div>
