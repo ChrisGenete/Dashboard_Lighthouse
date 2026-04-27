@@ -5,6 +5,27 @@ import '../styles/SpotifyWidget.css';
 const API_URL = process.env.REACT_APP_API_URL;
 const NOW_PLAYING_REFRESH_MS = 30000;
 
+const getApiErrorMessage = async (response, fallbackMessage) => {
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('application/json')) {
+    const data = await response.json();
+    return data.message || fallbackMessage;
+  }
+
+  const text = (await response.text()).trim();
+
+  if (response.status === 404 && text.includes('Cannot POST')) {
+    return 'Spotify playback endpoint was not found. Restart the backend server so the new playback routes are loaded.';
+  }
+
+  if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+    return `${fallbackMessage} The server returned a non-JSON ${response.status} response.`;
+  }
+
+  return text || fallbackMessage;
+};
+
 function SpotifyWidget() {
   const [token, setToken] = useState(null);
   const [nowPlaying, setNowPlaying] = useState(null);
@@ -79,8 +100,8 @@ function SpotifyWidget() {
       }
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Failed to fetch currently playing track');
+        const message = await getApiErrorMessage(response, 'Failed to fetch currently playing track');
+        throw new Error(message);
       }
 
       const data = await response.json();
@@ -111,8 +132,8 @@ function SpotifyWidget() {
       }
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Spotify playback action failed');
+        const message = await getApiErrorMessage(response, 'Spotify playback action failed.');
+        throw new Error(message);
       }
 
       window.setTimeout(fetchCurrentlyPlaying, 400);
