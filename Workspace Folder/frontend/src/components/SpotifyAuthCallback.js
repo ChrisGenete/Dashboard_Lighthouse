@@ -1,11 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 function SpotifyAuthCallback() {
   const [message, setMessage] = useState('Processing Spotify authorization...');
   const [error, setError] = useState(null);
+  const hasProcessedCallback = useRef(false);
 
   useEffect(() => {
     const handleCallback = async () => {
+      if (hasProcessedCallback.current) {
+        return;
+      }
+
+      hasProcessedCallback.current = true;
+
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
       const errorParam = params.get('error');

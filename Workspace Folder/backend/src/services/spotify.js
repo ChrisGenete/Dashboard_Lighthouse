@@ -170,5 +170,6 @@ module.exports = {
   getAuthorizeUrl,
   refreshUserAccessToken,
   getClientCredentialsToken,
+  createSpotifyApiWithAccessToken,
   ensureSpotifyToken
 };
