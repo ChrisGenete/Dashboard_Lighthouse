@@ -54,11 +54,10 @@ router.get('/auth/token', (req, res) => {
   });
 });
 
-router.get('/auth/callback', async (req, res) => {
-  const { code, error } = req.query;
-
-  if (error) {
-    return res.status(400).send(`Spotify authorization error: ${error}`);
+router.post('/auth/token', async (req, res) => {
+  const code = req.body.code || req.query.code;
+  if (!code) {
+    return res.status(400).json({ message: 'Authorization code is required.' });
   }
 
   try {
@@ -69,10 +68,41 @@ router.get('/auth/callback', async (req, res) => {
       expires_in: data.body.expires_in
     });
 
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.json({
+      access_token: data.body.access_token,
+      refresh_token: data.body.refresh_token,
+      expires_in: data.body.expires_in,
+      scope: data.body.scope
+    });
+  } catch (authError) {
+    res.status(500).json({ message: authError.message });
+  }
+});
+
+router.get('/auth/callback', async (req, res) => {
+  const { code, error } = req.query;
+
+  if (error) {
+    return res.redirect(`${process.env.FRONTEND_URL || 'http://127.0.0.1:3000'}?error=${error}`);
+  }
+
+  if (!code) {
+    return res.redirect(`${process.env.FRONTEND_URL || 'http://127.0.0.1:3000'}?error=no_code`);
+  }
+
+  try {
+    const data = await spotifyUserApi.authorizationCodeGrant(code);
+    setUserTokens({
+      access_token: data.body.access_token,
+      refresh_token: data.body.refresh_token,
+      expires_in: data.body.expires_in
+    });
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:3000';
     return res.redirect(`${frontendUrl}?spotify=connected`);
   } catch (authError) {
-    return res.status(500).send(`Spotify auth callback failed: ${authError.message}`);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:3000';
+    return res.redirect(`${frontendUrl}?error=auth_failed&details=${encodeURIComponent(authError.message)}`);
   }
 });
 

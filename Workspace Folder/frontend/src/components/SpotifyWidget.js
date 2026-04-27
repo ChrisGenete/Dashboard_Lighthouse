@@ -27,7 +27,7 @@ function SpotifyWidget() {
   const fetchAccessToken = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/token`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/spotify/auth/token`);
       
       if (response.ok) {
         const data = await response.json();
@@ -49,7 +49,7 @@ function SpotifyWidget() {
   };
 
   const handleLogin = () => {
-    window.location.href = `${process.env.REACT_APP_API_URL}/auth/login`;
+    window.location.href = `${process.env.REACT_APP_API_URL}/api/spotify/auth/login`;
   };
 
   const handleLogout = () => {
