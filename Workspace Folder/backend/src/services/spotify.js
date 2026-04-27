@@ -53,13 +53,23 @@ var generateRandomString = function (length) {
 
 const getAuthorizeUrl = () => {
   const scopes = [
+    'streaming',
+    'user-read-email',
+    'user-read-private',
     'user-read-currently-playing',
     'user-read-playback-state',
     'playlist-read-private',
     'playlist-read-collaborative'
   ];
   const state = generateRandomString(16);
-  return spotifyUserApi.createAuthorizeURL(scopes, state);
+  var auth_queryParameters = new URLSearchParams({
+    response_type: 'code',
+    client_id: process.env.SPOTIFY_CLIENT_ID,
+    scope: scopes.join(' '),
+    redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
+    state: state
+  });
+  return (`https://accounts.spotify.com/authorize?${auth_queryParameters.toString()}`);
 };
 
 const clearUserTokens = () => {
