@@ -94,6 +94,10 @@ function SpotifyWidget() {
       const data = await response.json();
 
       if (!response.ok) {
+        // If playlist is not configured, don't show as error - just skip playlist display
+        if (response.status === 400 && data.message?.includes('not configured')) {
+          return;
+        }
         throw new Error(data.message || 'Could not load Spotify playlist.');
       }
 
@@ -104,7 +108,10 @@ function SpotifyWidget() {
       setPlaylist(data);
       setPlaylistTracks(tracks.slice(0, 10));
     } catch (fetchError) {
-      setError(fetchError.message);
+      // Only show error for actual API errors, not configuration issues
+      if (!fetchError.message?.includes('not configured')) {
+        setError(fetchError.message);
+      }
     }
   };
 
