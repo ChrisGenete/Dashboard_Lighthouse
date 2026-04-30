@@ -39,8 +39,14 @@ All routes are prefixed with `/api/`
 - `GET /github/repos/:username` - User repositories
 
 ### Spotify
-- `GET /spotify/currently-playing` - Now playing
-- `GET /spotify/top-tracks` - Top 10 tracks
+- `GET /spotify/auth/login` - Redirect user to Spotify OAuth consent screen
+- `GET /spotify/auth/callback` - Spotify OAuth callback to exchange the authorization code for tokens
+- `GET /spotify/auth/status` - Check whether Spotify user auth is active
+- `GET /spotify/auth/token` - Retrieve the current Spotify user access token
+- `POST /spotify/token` - Acquire a client credentials access token
+- `GET /spotify/currently-playing` - Now playing track and current playlist
+- `GET /spotify/top-tracks` - User top tracks
+- `GET /spotify/playlist` - Playlist details
 
 ### Email
 - `GET /email/summary` - Email summary

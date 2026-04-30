@@ -12,7 +12,17 @@ function TaskWidget() {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/tasks`);
       const data = await response.json();
-      setTasks(data);
+      let tasks = [];
+      if (Array.isArray(data)) {
+        tasks = data;
+      } else if (Array.isArray(data.items)) {
+        tasks = data.items;
+      } else if (Array.isArray(data.body?.items)) {
+        tasks = data.body.items;
+      } else {
+        console.warn('Unexpected tasks response shape:', data);
+      }
+      setTasks(tasks);
     } catch (error) {
       console.error('Failed to fetch tasks:', error);
     }
