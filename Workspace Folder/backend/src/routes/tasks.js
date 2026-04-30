@@ -2,6 +2,11 @@ const express = require('express');
 const Task = require('../models/Task');
 const router = express.Router();
 
+const normalizeTaskPayload = (payload) => ({
+  ...payload,
+  dueDate: payload.dueDate || null
+});
+
 // Get all tasks
 router.get('/', async (req, res) => {
   try {
@@ -25,7 +30,7 @@ router.get('/:id', async (req, res) => {
 
 // Create task
 router.post('/', async (req, res) => {
-  const task = new Task(req.body);
+  const task = new Task(normalizeTaskPayload(req.body));
   try {
     const newTask = await task.save();
     res.status(201).json(newTask);
@@ -39,7 +44,7 @@ router.put('/:id', async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
     if (!task) return res.status(404).json({ message: 'Task not found' });
-    Object.assign(task, req.body);
+    Object.assign(task, normalizeTaskPayload(req.body));
     const updated = await task.save();
     res.json(updated);
   } catch (error) {
